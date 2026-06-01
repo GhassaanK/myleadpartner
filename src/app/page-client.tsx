@@ -141,14 +141,18 @@ const thisWay = [
 
 const teamMembers = [
   {
-    name: "Founder name coming soon",
-    role: "Founder",
-    bio: "Leads growth strategy, acquisition decisions, and the operating cadence behind each partnership.",
+    name: "Ghassaan",
+    role: "Co-Founder & Growth Lead",
+    bio: "Runs the growth infrastructure across every engagement. Paid acquisition, web, social, and the operational systems that turn strategy into measurable pipeline.",
+    image: "/Ghassaan-portrait.png",
+    imageMobile: "/Ghassaan.png",
   },
   {
-    name: "Partner name coming soon",
-    role: "Growth Partner",
-    bio: "Builds the funnel infrastructure, content systems, and execution rhythm that turn intent into pipeline.",
+    name: "Akram Shams",
+    role: "Co-Founder & Creative Lead",
+    bio: "The senior operator behind every partnership. Leads client relationships, creative direction, and the execution standards that keep the work accountable to real business outcomes.",
+    image: "/Akram-portrait.png",
+    imageMobile: "/Akram.png",
   },
 ];
 
@@ -156,22 +160,32 @@ const faqs = [
   {
     question: "How long are engagements?",
     answer:
-      "Partnerships are built as monthly operating relationships, not one-off delivery sprints. We will replace this with your confirmed engagement terms.",
+      "Most partnerships run on a monthly retainer with no fixed lock-in period. We work in 30-day cycles with a review at the end of each month. That said, the model is built for compounding. The results get meaningfully better between month two and month four as the foundation matures. Clients who stay see that. Clients who leave after 30 days rarely do.",
   },
   {
     question: "What happens during onboarding?",
     answer:
-      "We start with diagnosis, tracking, funnel review, and a clear growth architecture before scaling execution. Final onboarding copy can be dropped in here.",
+      "The first two weeks are diagnosis, not execution. We map your revenue model, audit your current acquisition infrastructure, identify conversion gaps, and build a growth architecture before anything goes live. Most clients are surprised by what we find in this phase. We do not run a single campaign until we know exactly what it needs to do.",
   },
   {
-    question: "Do you work outside Pakistan?",
+    question: "Do you work with businesses outside Pakistan?",
     answer:
-      "Yes. We operate from Karachi and work with businesses across the GCC, South Asia, and remote-first markets.",
+      "Yes. We are based in Karachi but operate across the GCC, South Asia, and remote-first markets globally. A significant portion of our work has been for Gulf-region clients, particularly in real estate and service businesses targeting high-value buyers. Time zones have never been a blocker.",
   },
   {
     question: "How does pricing work?",
     answer:
-      "Pricing is custom by scope, channels, and operating depth. We will add your confirmed starting figure once you share it.",
+      "Pricing is scoped to your market, the channels we are running, and the depth of the operating relationship. We do not have a rate card because no two partnerships look the same. What we can tell you is that engagements are structured as monthly retainers, and the starting point depends on where you are based and what you need. Book a discovery call and we will give you a clear number within 24 hours.",
+  },
+  {
+    question: "What do you actually need from us to get started?",
+    answer:
+      "Access and context. Ad account access, website credentials, and an honest conversation about where growth is currently stuck. We do not need a brief, a deck, or a strategy document. We build those. What we need from you is 90 minutes in the first week and a willingness to move fast once the architecture is in place.",
+  },
+  {
+    question: "How is this different from hiring a freelancer or a full agency?",
+    answer:
+      "A freelancer owns one piece. A traditional agency owns their deliverables. We own the outcome. That means we are thinking across every channel, every month, with full context on your business. Not just the scope we were hired for. There are no handoffs, no account managers between you and the work, and no invoices for things that did not move the number.",
   },
 ];
 
@@ -662,21 +676,35 @@ function Team() {
       <div className="page-grid section-intro">
         <Reveal>
           <SectionTag>About The Team</SectionTag>
-          <h2>Built by operators who stay close to the work.</h2>
+          <h2>Two operators. One integrated system.</h2>
         </Reveal>
         <Reveal delay={0.12}>
           <p>
-            Founder names, one-line bios, and final photography will be added
-            here. The section is structured now so the final content drops in
-            cleanly without changing the page rhythm.
+            No account managers. No handoffs. The people you talk to are the
+            people doing the work.
           </p>
         </Reveal>
       </div>
       <div className="team-grid">
         {teamMembers.map((member, index) => (
           <Reveal key={member.name} delay={index * 0.08} className="team-card">
-            <div className="team-photo" aria-hidden="true">
-              <span>{String(index + 1).padStart(2, "0")}</span>
+            <div className="team-photo">
+              <Image
+                src={member.imageMobile}
+                alt={member.name}
+                fill
+                sizes="(max-width: 900px) 100vw, 50vw"
+                style={{ objectFit: "cover", objectPosition: "top center" }}
+                className="team-photo-square"
+              />
+              <Image
+                src={member.image}
+                alt={member.name}
+                fill
+                sizes="50vw"
+                style={{ objectFit: "cover", objectPosition: "top center" }}
+                className="team-photo-portrait"
+              />
             </div>
             <div>
               <span>{member.role}</span>

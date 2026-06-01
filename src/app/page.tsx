@@ -52,8 +52,8 @@ export default async function Home() {
   const isPakistan = country === 'PK'
 
   const pricingText = isPakistan
-    ? 'We work on custom monthly retainers. Partnerships start from PKR 60,000.'
-    : 'We work on custom monthly retainers. Partnerships start from $599.'
+    ? 'We work on custom monthly retainers. Our services start from as low as PKR 60,000.'
+    : 'We work on custom monthly retainers. Our services start from as low as $499.'
 
   return <HomePageClient pricingText={pricingText} />
 }
