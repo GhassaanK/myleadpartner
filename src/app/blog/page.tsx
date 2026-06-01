@@ -27,76 +27,13 @@ export const revalidate = 86400;
 
 const articles = [
   {
-    slug: "how-to-build-lead-generation-system",
-    title: "How to Build a Lead Generation System for a Service Business",
+    slug: "how-to-run-meta-ads-for-service-business",
+    title: "How to Run Meta Ads for a Service Business (Without Wasting Your Budget)",
     excerpt:
-      "Most service businesses don't have a lead generation problem. They have a lead generation system problem.",
-    date: "May 29, 2026",
-    category: "Lead Generation",
-    readTime: "14 min read",
-  },
-  {
-    slug: "why-meta-ads-arent-scaling",
-    title: "Why Your Meta Ads Aren't Scaling (And It's Probably Not the Algorithm)",
-    excerpt:
-      "You've scaled your Meta ads and results got worse. Cost per lead went up. Purchases dried up. Here's why -- and it's probably not the algorithm.",
-    date: "May 27, 2026",
+      "Most service businesses run Meta ads the same way e-commerce brands do. The economics are completely different. Here's how to build a campaign that actually generates clients.",
+    date: "June 1, 2026",
     category: "Acquisition",
-    readTime: "12 min read",
-  },
-  {
-    slug: "growth-architecture-vs-marketing-tactics",
-    title: "Growth Architecture vs. Marketing Tactics: Why Most Businesses Get It Wrong",
-    excerpt:
-      "The difference between running campaigns and building systems. Why agencies focus on tactics when your business needs architecture.",
-    date: "May 24, 2026",
-    category: "Strategy",
     readTime: "8 min read",
-  },
-  {
-    slug: "unit-economics-funnel-design",
-    title: "Unit Economics: The Foundation of Funnel Design",
-    excerpt:
-      "How to structure your funnel around what actually matters: the cost per acquisition and lifetime value that drives profitability.",
-    date: "May 18, 2026",
-    category: "Operations",
-    readTime: "10 min read",
-  },
-  {
-    slug: "performance-marketing-beyond-roas",
-    title: "Performance Marketing Beyond ROAS: Building Predictable Acquisition",
-    excerpt:
-      "ROAS is a vanity metric. Here's how to structure paid acquisition around the metrics that actually move your business.",
-    date: "May 12, 2026",
-    category: "Acquisition",
-    readTime: "9 min read",
-  },
-  {
-    slug: "lead-generation-infrastructure",
-    title: "The Hidden Cost of Inefficient Lead Generation Infrastructure",
-    excerpt:
-      "Most businesses lose 40-60% of potential leads before they even see them. Here's how to build the right infrastructure.",
-    date: "May 6, 2026",
-    category: "Lead Generation",
-    readTime: "7 min read",
-  },
-  {
-    slug: "content-systems-compounding",
-    title: "Content Systems That Compound: Building Organic Moats",
-    excerpt:
-      "How to structure content production so each piece works harder than the last, and feeds your paid channels.",
-    date: "April 30, 2026",
-    category: "Content",
-    readTime: "11 min read",
-  },
-  {
-    slug: "growth-operating-model",
-    title: "The Growth Operating Model: How to Scale Without Chaos",
-    excerpt:
-      "A breakdown of how in-house growth teams operate, and how to replicate that structure in your business.",
-    date: "April 24, 2026",
-    category: "Operations",
-    readTime: "12 min read",
   },
 ];
 
@@ -171,7 +108,7 @@ export default function Blog() {
         {/* More Coming */}
         <div className="mt-12 rounded-lg border border-[var(--border)] bg-[var(--surface)] p-8 text-center">
           <p className="text-[var(--secondary)]">
-            More articles coming soon. Subscribe to get notified about new insights.
+            More articles coming soon.
           </p>
         </div>
       </div>
