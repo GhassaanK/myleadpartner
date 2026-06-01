@@ -7,6 +7,8 @@ import { motion, useInView, useScroll, useTransform } from "framer-motion";
 import Lenis from "lenis";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import Script from 'next/script'
+
 
 type Phase = {
   label: string;
@@ -172,6 +174,7 @@ const faqs = [
       "Pricing is custom by scope, channels, and operating depth. We will add your confirmed starting figure once you share it.",
   },
 ];
+
 
 function Logo() {
   return (
@@ -759,30 +762,35 @@ function Results() {
 }
 
 function Testimonials() {
+
   return (
+
     <section className="section testimonials-section">
       <div className="page-grid section-intro">
         <Reveal>
           <SectionTag>Testimonials</SectionTag>
-          <h2>Client proof will connect here.</h2>
+          <h2>What our partners say.</h2>
         </Reveal>
         <Reveal delay={0.12}>
           <p>
-            This section is ready for the Google Business Profile reviews
-            snippet. Until the live import is added, it holds space without
-            pretending to show final reviews.
+            Real feedback from businesses we have worked closely with.
           </p>
         </Reveal>
       </div>
       <Reveal className="testimonial-panel">
-        <p>Google Business Profile review import</p>
-        <strong>Live reviews will appear in this space once your snippet is added.</strong>
+        <Script src="https://elfsightcdn.com/platform.js" strategy="lazyOnload" />
+        <div
+          className="elfsight-app-5a3f98b1-e605-4645-8509-f997a9921154"
+          data-elfsight-app-lazy
+          style={{ width: "100%" }}
+        />
       </Reveal>
     </section>
   );
+
 }
 
-function FAQ() {
+function FAQ({ pricingText }: { pricingText: string }) {
   return (
     <section className="section faq-section">
       <div className="page-grid section-intro">
@@ -792,8 +800,7 @@ function FAQ() {
         </Reveal>
         <Reveal delay={0.12}>
           <p className="pricing-signal">
-            We work on custom monthly retainers. Most partnerships start from a
-            figure we will confirm with you.
+            {pricingText}
           </p>
         </Reveal>
       </div>
@@ -1009,7 +1016,7 @@ function LeadModal() {
   );
 }
 
-export function HomePageClient() {
+export function HomePageClient({ pricingText }: { pricingText: string }) {
   useEffect(() => {
     if (window.location.hash) {
       const target = document.querySelector(window.location.hash);
@@ -1055,7 +1062,7 @@ export function HomePageClient() {
         <Team />
         <Results />
         <Testimonials />
-        <FAQ />
+        <FAQ pricingText={pricingText} />
         <CTA />
       </main>
       <Footer />

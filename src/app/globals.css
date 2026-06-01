@@ -980,16 +980,12 @@ p {
 }
 
 .testimonial-panel {
-  display: grid;
-  grid-template-columns: 0.7fr 1.3fr;
-  gap: 32px;
-  align-items: center;
-  min-height: 280px;
-  padding: clamp(28px, 5vw, 58px);
-  border: 1px solid var(--border);
-  background:
-    linear-gradient(135deg, rgba(0, 217, 110, 0.07), transparent 38%),
-    var(--raised);
+  width: min(1080px, calc(100vw - 40px));
+  margin: 56px auto 0;
+}
+
+.testimonial-panel > div {
+  width: 100%;
 }
 
 .testimonial-panel p {
