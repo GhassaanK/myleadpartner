@@ -36,11 +36,11 @@ type WorkCard = {
 };
 
 const navItems = [
-  { label: "How It Works", href: "#how-it-works" },
-  { label: "Services", href: "#services" },
-  { label: "Work", href: "#work" },
+  { label: "Services", href: "/services" },
+  { label: "About", href: "/about" },
+  { label: "Work", href: "/case-studies" },
   { label: "Blog", href: "/blog" },
-  { label: "Contact", href: "#contact" },
+  { label: "Contact", href: "/contact" },
 ];
 
 const whatsappHref = "https://wa.me/923112887279";
@@ -981,6 +981,10 @@ function Footer() {
         </div>
         <div className="footer-links">
           <a href={`mailto:${contactEmail}`}>{contactEmail}</a>
+          <Link href="/services">Services</Link>
+          <Link href="/about">About</Link>
+          <Link href="/case-studies">Case Studies</Link>
+          <Link href="/contact">Contact</Link>
           <a href="https://www.linkedin.com/company/my-lead-partner" target="_blank" rel="noopener noreferrer">
             LinkedIn
           </a>
@@ -994,6 +998,9 @@ function Footer() {
             <span>© 2026 My Lead Partner. All rights reserved.</span>
             <Link href="/blog" className="text-[var(--secondary)] hover:text-[var(--text)] transition-colors">
               Blog
+            </Link>
+            <Link href="/about" className="text-[var(--secondary)] hover:text-[var(--text)] transition-colors">
+              About
             </Link>
             <Link href="/privacy" className="text-[var(--secondary)] hover:text-[var(--text)] transition-colors">
               Privacy Policy

@@ -6,6 +6,7 @@ import {
   getCaseStudyBySlug,
 } from "@/lib/case-studies";
 import { siteName, siteUrl } from "@/lib/site";
+import { ImageLightbox } from "./ImageLightbox";
 
 export const revalidate = 300;
 
@@ -93,6 +94,11 @@ export default async function CaseStudyPage({ params }: { params: Promise<{ slug
     keywords: caseStudy.tags.join(", "),
   };
 
+  const allImages = [
+    ...(caseStudy.coverImagePath ? [caseStudy.coverImagePath] : []),
+    ...caseStudy.galleryImages,
+  ];
+
   return (
     <main className="min-h-screen bg-[var(--background)] text-[var(--text)]">
       <script
@@ -164,8 +170,9 @@ export default async function CaseStudyPage({ params }: { params: Promise<{ slug
       {caseStudy.coverImagePath && (
         <div className="mx-auto max-w-5xl px-6 pt-10 sm:px-8 md:pt-14">
           <div className="relative aspect-[16/9] overflow-hidden rounded-lg border border-[var(--border)] bg-[var(--surface)]">
-            <img
-              src={caseStudy.coverImagePath}
+            <ImageLightbox
+              images={allImages}
+              index={0}
               alt={caseStudy.title}
               className="h-full w-full object-cover"
             />
@@ -189,8 +196,9 @@ export default async function CaseStudyPage({ params }: { params: Promise<{ slug
                   key={`${image}-${index}`}
                   className="relative aspect-[16/10] overflow-hidden rounded-lg border border-[var(--border)] bg-[var(--surface)]"
                 >
-                  <img
-                    src={image}
+                  <ImageLightbox
+                    images={allImages}
+                    index={caseStudy.coverImagePath ? index + 1 : index}
                     alt={`${caseStudy.title} image ${index + 1}`}
                     className="h-full w-full object-cover"
                   />
@@ -208,7 +216,7 @@ export default async function CaseStudyPage({ params }: { params: Promise<{ slug
             My Lead Partner builds acquisition, web, content, and operating rhythm as one connected system.
           </p>
           <Link
-            href="/#contact"
+            href="/contact"
             className="mt-4 inline-block rounded-md bg-[var(--accent)] px-4 py-2 font-medium leading-relaxed text-[var(--background)] transition-opacity hover:opacity-90"
           >
             Book a discovery call
