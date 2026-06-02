@@ -1,9 +1,10 @@
 import type { MetadataRoute } from "next";
+import { getCaseStudies } from "@/lib/case-studies";
 import { getPosts } from "@/lib/posts";
 import { siteUrl } from "@/lib/site";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const posts = await getPosts();
+  const [posts, caseStudies] = await Promise.all([getPosts(), getCaseStudies()]);
   const staticRoutes: MetadataRoute.Sitemap = [
     {
       url: siteUrl,
@@ -13,6 +14,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
     {
       url: `${siteUrl}/blog`,
+      lastModified: new Date(),
+      changeFrequency: "daily",
+      priority: 0.8,
+    },
+    {
+      url: `${siteUrl}/case-studies`,
       lastModified: new Date(),
       changeFrequency: "daily",
       priority: 0.8,
@@ -32,6 +39,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       lastModified: new Date(post.publishedAt),
       changeFrequency: "monthly" as const,
       priority: 0.7,
+    })),
+    ...caseStudies.map((caseStudy) => ({
+      url: `${siteUrl}/case-studies/${caseStudy.slug}`,
+      lastModified: new Date(caseStudy.publishedAt),
+      changeFrequency: "monthly" as const,
+      priority: 0.8,
     })),
   ];
 }

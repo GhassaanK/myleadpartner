@@ -53,12 +53,12 @@ export default async function Blog() {
           <div className="mb-4 flex items-center">
             <Link
               href="/"
-              className="inline-flex items-center gap-2 rounded-md border border-[var(--border)] bg-[var(--surface)] px-3 py-1 text-sm font-medium text-[var(--text)] hover:opacity-90"
+              className="inline-flex items-center gap-2 rounded-md border border-[var(--border)] bg-[var(--surface)] px-3 py-1 text-sm font-medium leading-relaxed text-[var(--text)] hover:opacity-90"
             >
               Back to home
             </Link>
           </div>
-          <h1 className="font-heading text-3xl font-bold md:text-4xl">Blog</h1>
+          <h1 className="font-heading text-3xl font-bold leading-tight md:text-4xl">Blog</h1>
           <p className="mt-4 text-base leading-relaxed text-[var(--secondary)]">
             Insights on growth strategy, marketing operations, lead generation, and building scalable systems.
             Read how we think about business growth.
@@ -80,7 +80,7 @@ export default async function Blog() {
                   <span className="text-xs text-[var(--secondary)]">{post.readTime}</span>
                 </div>
 
-                <h2 className="font-heading text-xl font-bold text-[var(--text)] transition-colors group-hover:text-[var(--accent)]">
+                <h2 className="font-heading text-xl font-bold leading-snug text-[var(--text)] transition-colors group-hover:text-[var(--accent)]">
                   {post.title}
                 </h2>
 
@@ -90,7 +90,7 @@ export default async function Blog() {
 
                 <div className="mt-4 flex items-center justify-between gap-4">
                   <span className="text-xs text-[var(--muted)]">{formatPublishedAt(post.publishedAt)}</span>
-                  <span className="text-sm text-[var(--accent)] transition-transform group-hover:translate-x-1">
+                  <span className="text-sm leading-relaxed text-[var(--accent)] transition-transform group-hover:translate-x-1">
                     Read article
                   </span>
                 </div>

@@ -110,7 +110,7 @@ export default async function BlogArticle({ params }: { params: Promise<{ slug: 
           <div className="mb-6 flex items-center gap-2">
             <Link
               href="/blog"
-              className="inline-flex items-center gap-2 rounded-md border border-[var(--border)] bg-[var(--surface)] px-3 py-1 text-sm font-medium text-[var(--text)] hover:opacity-90"
+              className="inline-flex items-center gap-2 rounded-md border border-[var(--border)] bg-[var(--surface)] px-3 py-1 text-sm font-medium leading-relaxed text-[var(--text)] hover:opacity-90"
             >
               Back to blog
             </Link>
@@ -123,8 +123,8 @@ export default async function BlogArticle({ params }: { params: Promise<{ slug: 
             <span className="text-xs text-[var(--muted)]">{post.readTime}</span>
           </div>
 
-          <h1 className="font-heading text-3xl font-bold md:text-4xl">{post.title}</h1>
-          <p className="mt-4 text-sm text-[var(--secondary)]">
+          <h1 className="font-heading text-3xl font-bold leading-tight md:text-4xl">{post.title}</h1>
+          <p className="mt-4 text-sm leading-relaxed text-[var(--secondary)]">
             By {post.author || defaultAuthor} · {formatPublishedAt(post.publishedAt)}
           </p>
         </div>
@@ -138,6 +138,7 @@ export default async function BlogArticle({ params }: { params: Promise<{ slug: 
               font-size: 1.375rem;
               font-weight: 700;
               color: var(--text);
+              line-height: 1.25;
               margin-top: 2rem;
               margin-bottom: 0.75rem;
             }
@@ -146,6 +147,7 @@ export default async function BlogArticle({ params }: { params: Promise<{ slug: 
               font-size: 1.15rem;
               font-weight: 700;
               color: var(--text);
+              line-height: 1.3;
               margin-top: 1.5rem;
               margin-bottom: 0.65rem;
             }
@@ -179,10 +181,10 @@ export default async function BlogArticle({ params }: { params: Promise<{ slug: 
         </article>
 
         <div className="mt-12 rounded-lg border border-[var(--border)] bg-[var(--surface)] p-8">
-          <h3 className="font-heading text-xl font-bold text-[var(--text)]">
+          <h3 className="font-heading text-xl font-bold leading-snug text-[var(--text)]">
             Ready to build growth as a system?
           </h3>
-          <p className="mt-2 text-base text-[var(--secondary)]">
+          <p className="mt-2 text-base leading-relaxed text-[var(--secondary)]">
             My Lead Partner connects acquisition, web, content, and operating rhythm so growth does not sit in silos.
           </p>
           <Link

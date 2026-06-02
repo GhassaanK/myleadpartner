@@ -182,7 +182,7 @@ button {
   border-radius: 999px;
   font-size: 13px;
   font-weight: 700;
-  line-height: 1;
+  line-height: 1.25;
   transition:
     transform 0.25s ease,
     border-color 0.25s ease,
@@ -314,7 +314,7 @@ button {
 .mobile-menu a {
   font-family: var(--font-heading), serif;
   font-size: clamp(34px, 10vw, 62px);
-  line-height: 0.95;
+  line-height: 1.08;
 }
 
 .mobile-menu .mobile-cta {
@@ -329,7 +329,7 @@ button {
   min-height: 44px;
   font-family: var(--font-body), Arial, sans-serif;
   font-size: 14px;
-  line-height: 1;
+  line-height: 1.25;
 }
 
 .page-grid {
@@ -350,7 +350,7 @@ button {
   color: var(--accent);
   font-size: 12px;
   font-weight: 800;
-  line-height: 1;
+  line-height: 1.25;
   text-transform: uppercase;
 }
 
@@ -367,7 +367,7 @@ blockquote {
 h1 {
   max-width: 720px;
   font-size: clamp(50px, 4.7vw, 76px);
-  line-height: 0.98;
+  line-height: 1.06;
 }
 
 h1 span {
@@ -382,16 +382,102 @@ h1 span {
 h2 {
   max-width: 760px;
   font-size: clamp(42px, 6vw, 76px);
-  line-height: 0.95;
+  line-height: 1.06;
 }
 
 h3 {
   font-size: clamp(24px, 3vw, 36px);
-  line-height: 1.02;
+  line-height: 1.12;
 }
 
 p {
   margin: 0;
+}
+
+.legal-content h2 {
+  color: var(--text);
+  font-family: var(--font-heading), Georgia, serif;
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.legal-content h3 {
+  color: var(--text);
+  font-family: var(--font-heading), Georgia, serif;
+  font-size: 1.125rem;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.legal-content p,
+.legal-content li {
+  color: var(--secondary);
+  font-size: 1rem;
+  line-height: 1.8;
+}
+
+.legal-content ul,
+.legal-content ol {
+  color: var(--secondary);
+  line-height: 1.8;
+}
+
+.legal-content section > * + * {
+  margin-top: 0.9rem;
+}
+
+.case-study-prose h2 {
+  color: var(--text);
+  font-family: var(--font-heading), Georgia, serif;
+  font-size: clamp(1.6rem, 3vw, 2.35rem);
+  font-weight: 700;
+  line-height: 1.2;
+  margin: 2.4rem 0 0.9rem;
+}
+
+.case-study-prose h3 {
+  color: var(--text);
+  font-family: var(--font-heading), Georgia, serif;
+  font-size: clamp(1.25rem, 2vw, 1.65rem);
+  font-weight: 700;
+  line-height: 1.3;
+  margin: 1.8rem 0 0.75rem;
+}
+
+.case-study-prose p,
+.case-study-prose li {
+  color: var(--secondary);
+  font-size: 1.05rem;
+  line-height: 1.8;
+}
+
+.case-study-prose p {
+  margin-bottom: 1.1rem;
+}
+
+.case-study-prose ul,
+.case-study-prose ol {
+  color: var(--secondary);
+  line-height: 1.8;
+  margin: 0 0 1.2rem;
+  padding-left: 1.35rem;
+}
+
+.case-study-prose blockquote {
+  border-left: 2px solid var(--accent);
+  color: var(--text);
+  font-family: var(--font-heading), Georgia, serif;
+  font-size: clamp(1.35rem, 2.4vw, 2rem);
+  line-height: 1.35;
+  margin: 2rem 0;
+  padding-left: 1.2rem;
+}
+
+.case-study-prose a {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
 }
 
 .hero-section {
@@ -502,7 +588,7 @@ p {
   font-family: var(--font-heading), serif;
   font-size: 24px;
   font-weight: 520;
-  line-height: 1.08;
+  line-height: 1.18;
 }
 
 .stat-row {
@@ -531,7 +617,7 @@ p {
   font-family: var(--font-heading), serif;
   font-size: 34px;
   font-weight: 520;
-  line-height: 1;
+  line-height: 1.1;
 }
 
 .stat-card span {
@@ -738,7 +824,7 @@ p {
   max-width: 920px;
   text-align: center;
   font-size: clamp(43px, 6vw, 86px);
-  line-height: 1.02;
+  line-height: 1.12;
 }
 
 .manifesto-section blockquote span {
@@ -753,9 +839,10 @@ p {
 }
 
 .phase-pin {
-  min-height: 100vh;
-  padding: clamp(110px, 13vw, 160px) 0;
-  overflow: hidden;
+  --phase-card-height: clamp(460px, calc(100svh - 190px), 560px);
+  min-height: 100svh;
+  padding: clamp(72px, 10svh, 120px) 0;
+  overflow: visible;
 }
 
 .phase-grid {
@@ -795,29 +882,29 @@ p {
 
 .phase-window {
   grid-column: 7 / span 6;
-  height: 520px;
+  height: var(--phase-card-height);
   overflow: hidden;
   border: 1px solid var(--border);
   background: var(--background);
 }
 
 .phase-track {
-  height: 2080px;
+  height: calc(var(--phase-card-height) * 4);
 }
 
 .phase-card {
   display: flex;
-  height: 520px;
+  height: var(--phase-card-height);
   flex-direction: column;
   justify-content: center;
-  padding: clamp(28px, 5vw, 64px);
+  padding: clamp(28px, 4.5vw, 56px);
   background:
     linear-gradient(135deg, rgba(0, 217, 110, 0.07), transparent 36%),
     var(--raised);
 }
 
 .phase-card > span {
-  margin-bottom: 30px;
+  margin-bottom: clamp(18px, 3svh, 30px);
   color: var(--accent);
   font-size: 12px;
   font-weight: 800;
@@ -840,7 +927,7 @@ p {
   margin-top: 24px;
   color: var(--secondary);
   font-size: 17px;
-  line-height: 1.7;
+  line-height: 1.78;
 }
 
 .team-section {
@@ -992,23 +1079,55 @@ p {
   background: var(--surface);
 }
 
+.result-card-link {
+  display: block;
+  height: 100%;
+}
+
 .result-card p {
   min-height: 44px;
   color: var(--secondary);
   font-size: 14px;
 }
 
-.result-card strong {
+.result-card > strong,
+.result-card-link > strong {
   display: block;
   margin-top: 70px;
   color: var(--text);
   font-family: var(--font-heading), serif;
   font-size: clamp(56px, 6vw, 82px);
   font-weight: 520;
-  line-height: 0.9;
+  line-height: 1.02;
 }
 
-.result-card > span {
+.result-highlights {
+  display: grid;
+  gap: 14px;
+  margin-top: 54px;
+}
+
+.result-highlights div {
+  display: grid;
+  gap: 4px;
+}
+
+.result-highlights strong {
+  color: var(--text);
+  font-family: var(--font-heading), serif;
+  font-size: clamp(34px, 4vw, 52px);
+  font-weight: 520;
+  line-height: 1.05;
+}
+
+.result-highlights span {
+  color: var(--secondary);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.result-card > span,
+.result-card-link > span {
   display: block;
   margin-top: 16px;
   color: var(--text);
@@ -1049,7 +1168,7 @@ p {
   font-family: var(--font-heading), serif;
   font-size: clamp(30px, 4vw, 54px);
   font-weight: 520;
-  line-height: 1.05;
+  line-height: 1.15;
 }
 
 .faq-section {
@@ -1091,7 +1210,7 @@ p {
 .faq-item summary span {
   font-family: var(--font-heading), serif;
   font-size: clamp(22px, 3vw, 34px);
-  line-height: 1.1;
+  line-height: 1.2;
 }
 
 .faq-item summary i {
@@ -1224,7 +1343,7 @@ p {
   max-width: 780px;
   font-family: var(--font-heading), serif;
   font-size: clamp(56px, 8vw, 116px);
-  line-height: 0.92;
+  line-height: 1.04;
 }
 
 .footer-capture {
@@ -1375,7 +1494,7 @@ p {
   position: relative;
   z-index: 1;
   width: min(720px, 100%);
-  max-height: min(860px, calc(100vh - 48px));
+  max-height: min(860px, calc(100svh - 48px));
   overflow: auto;
   border: 1px solid var(--border);
   background: var(--surface);
@@ -1514,6 +1633,7 @@ p {
   .phase-card {
     height: auto;
     min-height: 420px;
+    justify-content: flex-start;
   }
 
   .team-card {
@@ -1591,7 +1711,7 @@ p {
 
   h1 {
     font-size: clamp(34px, 10.8vw, 46px);
-    line-height: 1.04;
+    line-height: 1.1;
     max-width: 100%;
   }
 

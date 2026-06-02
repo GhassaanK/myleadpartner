@@ -7,6 +7,7 @@ import { motion, useInView, useScroll, useTransform } from "framer-motion";
 import Lenis from "lenis";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import type { CaseStudy } from "@/lib/case-studies";
 import { contactEmail } from "@/lib/site";
 import Script from 'next/script'
 
@@ -20,6 +21,18 @@ type Phase = {
 type LeadFormProps = {
   compact?: boolean;
   source: string;
+};
+
+type WorkCard = {
+  id: string;
+  slug?: string;
+  client: string;
+  metric: string;
+  value: number;
+  suffix: string;
+  context: string;
+  detail: string;
+  highlights?: Array<{ value: string; label: string }>;
 };
 
 const navItems = [
@@ -83,8 +96,9 @@ const phases: Phase[] = [
   },
 ];
 
-const results = [
+const results: WorkCard[] = [
   {
+    id: "real-estate-gulf-region",
     client: "Real Estate, Gulf Region",
     metric: "4.2x",
     value: 4.2,
@@ -94,6 +108,7 @@ const results = [
       "Full funnel build from content strategy through Meta acquisition. Targeting high net worth Gulf investors for a Turkish citizenship by investment program.",
   },
   {
+    id: "ecommerce-fashion",
     client: "E-commerce, Fashion",
     metric: "62%",
     value: 62,
@@ -103,6 +118,7 @@ const results = [
       "Complete creative overhaul paired with landing page reconstruction and pixel setup. Same budget, structured better, the economics shifted in six weeks.",
   },
   {
+    id: "service-business-local",
     client: "Service Business, Local",
     metric: "80",
     value: 80,
@@ -112,6 +128,7 @@ const results = [
       "Built from scratch. No prior digital presence. Web, social, and lead generation infrastructure stood up in four weeks. Paid acquisition layered in at week five.",
   },
   {
+    id: "b2b-services",
     client: "B2B Services",
     metric: "3.8x",
     value: 3.8,
@@ -121,6 +138,25 @@ const results = [
       "Repositioned brand presence, rebuilt the lead funnel, and ran tightly managed paid campaigns. Combined growth management kept everything moving in the same direction.",
   },
 ];
+
+function metricValue(metric: string) {
+  const parsed = Number(metric.replace(/[^0-9.]/g, ""));
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
+function caseStudiesToWorkCards(caseStudies: CaseStudy[]): WorkCard[] {
+  return caseStudies.map((caseStudy) => ({
+    id: caseStudy.id,
+    slug: caseStudy.slug,
+    client: caseStudy.client || caseStudy.category,
+    metric: caseStudy.headlineMetric || "View",
+    value: metricValue(caseStudy.headlineMetric),
+    suffix: caseStudy.headlineMetric.replace(/[0-9.]/g, ""),
+    context: caseStudy.metricLabel || caseStudy.title,
+    detail: caseStudy.summary || "Open the full case study to see the system, execution, and outcome.",
+    highlights: caseStudy.highlightMetrics,
+  }));
+}
 
 const notThis = [
   "A freelancer who disappears after delivery",
@@ -755,7 +791,9 @@ function Counter({
   );
 }
 
-function Results() {
+function Results({ caseStudies }: { caseStudies: CaseStudy[] }) {
+  const workCards = caseStudies.length > 0 ? caseStudiesToWorkCards(caseStudies) : results;
+
   return (
     <section className="section results-section" id="work">
       <div className="page-grid section-intro">
@@ -771,20 +809,49 @@ function Results() {
         </Reveal>
       </div>
       <div className="results-grid">
-        {results.map((result, index) => (
-          <Reveal key={result.client} delay={index * 0.06} className="result-card">
-            <p>{result.client}</p>
-            <strong>
-              <Counter
-                value={result.value}
-                suffix={result.suffix}
-                decimals={result.metric.includes(".") ? 1 : 0}
-              />
-            </strong>
-            <span>{result.context}</span>
-            <small>{result.detail}</small>
-          </Reveal>
-        ))}
+        {workCards.map((result, index) => {
+          const content = (
+            <>
+              <p>{result.client}</p>
+              {result.highlights && result.highlights.length > 0 ? (
+                <div className="result-highlights">
+                  {result.highlights.map((metric) => (
+                    <div key={`${result.id}-${metric.value}-${metric.label}`}>
+                      <strong>{metric.value}</strong>
+                      {metric.label && <span>{metric.label}</span>}
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <strong>
+                  {result.value > 0 ? (
+                    <Counter
+                      value={result.value}
+                      suffix={result.suffix}
+                      decimals={result.metric.includes(".") ? 1 : 0}
+                    />
+                  ) : (
+                    result.metric
+                  )}
+                </strong>
+              )}
+              <span>{result.context}</span>
+              <small>{result.detail}</small>
+            </>
+          );
+
+          return (
+            <Reveal key={result.id ?? result.client} delay={index * 0.06} className="result-card">
+              {result.slug ? (
+                <Link href={`/case-studies/${result.slug}`} className="result-card-link">
+                  {content}
+                </Link>
+              ) : (
+                content
+              )}
+            </Reveal>
+          );
+        })}
       </div>
     </section>
   );
@@ -820,6 +887,8 @@ function Testimonials() {
 }
 
 function FAQ({ pricingText }: { pricingText: string }) {
+  const [openIndex, setOpenIndex] = useState<number | null>(null);
+
   return (
     <section className="section faq-section">
       <div className="page-grid section-intro">
@@ -836,8 +905,13 @@ function FAQ({ pricingText }: { pricingText: string }) {
       <div className="faq-list">
         {faqs.map((item, index) => (
           <Reveal key={item.question} delay={index * 0.04}>
-            <details className="faq-item">
-              <summary>
+            <details className="faq-item" open={openIndex === index}>
+              <summary
+                onClick={(event) => {
+                  event.preventDefault();
+                  setOpenIndex((current) => (current === index ? null : index));
+                }}
+              >
                 <span>{item.question}</span>
                 <i aria-hidden="true" />
               </summary>
@@ -1004,6 +1078,15 @@ function LeadForm({ compact = false, source }: LeadFormProps) {
 function LeadModal() {
   const [open, setOpen] = useState(false);
   const [source, setSource] = useState("Website CTA");
+  const scrollLocked = useRef(false);
+  const scrollPosition = useRef(0);
+  const previousBodyStyles = useRef({
+    overflow: "",
+    position: "",
+    top: "",
+    width: "",
+  });
+  const previousHtmlOverflow = useRef("");
 
   useEffect(() => {
     const openForm = (event: Event) => {
@@ -1016,9 +1099,42 @@ function LeadModal() {
   }, []);
 
   useEffect(() => {
-    document.body.style.overflow = open ? "hidden" : "";
+    const body = document.body;
+    const root = document.documentElement;
+    const restoreScroll = () => {
+      if (!scrollLocked.current) return;
+
+      root.style.overflow = previousHtmlOverflow.current;
+      body.style.overflow = previousBodyStyles.current.overflow;
+      body.style.position = previousBodyStyles.current.position;
+      body.style.top = previousBodyStyles.current.top;
+      body.style.width = previousBodyStyles.current.width;
+      window.scrollTo(0, scrollPosition.current);
+      scrollLocked.current = false;
+    };
+
+    if (open) {
+      scrollPosition.current = window.scrollY;
+      previousBodyStyles.current = {
+        overflow: body.style.overflow,
+        position: body.style.position,
+        top: body.style.top,
+        width: body.style.width,
+      };
+      previousHtmlOverflow.current = root.style.overflow;
+
+      root.style.overflow = "hidden";
+      body.style.overflow = "hidden";
+      body.style.position = "fixed";
+      body.style.top = `-${scrollPosition.current}px`;
+      body.style.width = "100%";
+      scrollLocked.current = true;
+      return restoreScroll;
+    }
+
+    restoreScroll();
     return () => {
-      document.body.style.overflow = "";
+      if (open) restoreScroll();
     };
   }, [open]);
 
@@ -1054,7 +1170,13 @@ function LeadModal() {
   );
 }
 
-export function HomePageClient({ pricingText }: { pricingText: string }) {
+export function HomePageClient({
+  caseStudies,
+  pricingText,
+}: {
+  caseStudies: CaseStudy[];
+  pricingText: string;
+}) {
   useEffect(() => {
     if (window.location.hash) {
       const target = document.querySelector(window.location.hash);
@@ -1098,7 +1220,7 @@ export function HomePageClient({ pricingText }: { pricingText: string }) {
         <Manifesto />
         <Partnership />
         <Team />
-        <Results />
+        <Results caseStudies={caseStudies} />
         <Testimonials />
         <FAQ pricingText={pricingText} />
         <CTA />

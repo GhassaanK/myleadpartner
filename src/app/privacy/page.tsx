@@ -1,3 +1,4 @@
+/* eslint-disable react/no-unescaped-entities */
 import Link from "next/link";
 import { contactEmail, siteUrl } from "@/lib/site";
 
@@ -32,18 +33,18 @@ export default function PrivacyPolicy() {
           <div className="mb-4 flex items-center">
             <Link
               href="/"
-              className="inline-flex items-center gap-2 rounded-md border border-[var(--border)] bg-[var(--surface)] px-3 py-1 text-sm font-medium text-[var(--text)] hover:opacity-90"
+              className="inline-flex items-center gap-2 rounded-md border border-[var(--border)] bg-[var(--surface)] px-3 py-1 text-sm font-medium leading-relaxed text-[var(--text)] hover:opacity-90"
             >
               ← Back to home
             </Link>
           </div>
-          <h1 className="font-heading text-3xl font-bold md:text-4xl">Privacy Policy</h1>
-          <p className="mt-2 text-sm text-[var(--secondary)]">My Lead Partner — Last updated: May 2026</p>
+          <h1 className="font-heading text-3xl font-bold leading-tight md:text-4xl">Privacy Policy</h1>
+          <p className="mt-2 text-sm leading-relaxed text-[var(--secondary)]">My Lead Partner — Last updated: May 2026</p>
         </div>
       </div>
 
       <div className="mx-auto max-w-3xl px-6 py-10 sm:px-8 md:py-12">
-        <div className="prose prose-invert max-w-none space-y-8 text-[var(--text)]">
+        <div className="legal-content prose prose-invert max-w-none space-y-8 text-[var(--text)]">
           <section>
             <h2 className="font-heading text-2xl font-bold text-[var(--text)]">Who We Are</h2>
             <p className="text-base leading-relaxed text-[var(--secondary)]">

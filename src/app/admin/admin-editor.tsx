@@ -24,11 +24,13 @@ import {
   setDoc,
   Timestamp,
 } from "firebase/firestore";
+import { upload } from "@vercel/blob/client";
 import { getFirebaseApp, isFirebaseConfigured } from "@/lib/firebase";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 type PostStatus = "published" | "scheduled";
+type ContentType = "posts" | "caseStudies";
 
 type FormState = {
   slug: string;
@@ -41,6 +43,15 @@ type FormState = {
   author: string;
   status: PostStatus;
   scheduledAt: string; // ISO datetime-local string
+  client: string;
+  summary: string;
+  headlineMetric: string;
+  metricLabel: string;
+  highlightMetrics: string;
+  duration: string;
+  services: string;
+  coverImagePath: string;
+  galleryImages: string;
 };
 
 type PostMeta = {
@@ -55,6 +66,15 @@ type PostMeta = {
   ogImagePath: string;
   author: string;
   content: string;
+  client?: string;
+  summary?: string;
+  headlineMetric?: string;
+  metricLabel?: string;
+  highlightMetrics?: Array<{ value: string; label: string }>;
+  duration?: string;
+  services?: string[];
+  coverImagePath?: string;
+  galleryImages?: string[];
 };
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -70,6 +90,22 @@ const initialForm: FormState = {
   author: "My Lead Partner",
   status: "published",
   scheduledAt: "",
+  client: "",
+  summary: "",
+  headlineMetric: "",
+  metricLabel: "",
+  highlightMetrics: "",
+  duration: "",
+  services: "",
+  coverImagePath: "",
+  galleryImages: "",
+};
+
+const initialCaseStudyForm: FormState = {
+  ...initialForm,
+  category: "Case Study",
+  readTime: "Case study",
+  author: "My Lead Partner",
 };
 
 function slugify(value: string) {
@@ -79,6 +115,14 @@ function slugify(value: string) {
     .replace(/['"]/g, "")
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "");
+}
+
+function cleanFileName(value: string) {
+  const dotIndex = value.lastIndexOf(".");
+  const extension = dotIndex >= 0 ? value.slice(dotIndex).toLowerCase() : "";
+  const name = dotIndex >= 0 ? value.slice(0, dotIndex) : value;
+
+  return `${slugify(name) || "image"}${extension.replace(/[^a-z0-9.]/g, "")}`;
 }
 
 function formatDate(ts: Timestamp) {
@@ -207,7 +251,7 @@ function DeleteModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4">
       <div className="w-full max-w-sm border border-[var(--border)] bg-[var(--surface)] p-6 shadow-2xl">
-        <h2 className="font-heading text-xl text-[var(--text)]">Delete post?</h2>
+        <h2 className="font-heading text-xl text-[var(--text)]">Delete item?</h2>
         <p className="mt-2 text-sm text-[var(--secondary)]">
           <span className="font-semibold text-[var(--text)]">{title}</span> will be
           permanently removed from Firestore.
@@ -263,6 +307,7 @@ function StatusBadge({ post }: { post: PostMeta }) {
 export function AdminEditor() {
   const [user, setUser] = useState<User | null>(null);
   const [posts, setPosts] = useState<PostMeta[]>([]);
+  const [contentType, setContentType] = useState<ContentType>("posts");
   const [selectedSlug, setSelectedSlug] = useState<string | null>(null);
   const [originalSlug, setOriginalSlug] = useState<string | null>(null);
   const [isNewPost, setIsNewPost] = useState(false);
@@ -271,7 +316,12 @@ export function AdminEditor() {
   const slugManuallyEdited = useRef(false);
   const [status, setStatus] = useState("");
   const [isSaving, setIsSaving] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<PostMeta | null>(null);
+  const isCaseStudy = contentType === "caseStudies";
+  const collectionName = isCaseStudy ? "caseStudies" : "posts";
+  const singularLabel = isCaseStudy ? "case study" : "post";
+  const pluralLabel = isCaseStudy ? "Case Studies" : "Posts";
 
   const app = useMemo(() => getFirebaseApp(), []);
   const auth = app ? getAuth(app) : null;
@@ -284,7 +334,7 @@ export function AdminEditor() {
     extensions: [
       StarterKit,
       LinkExtension.configure({ openOnClick: false }),
-      Placeholder.configure({ placeholder: "Write the article body here..." }),
+      Placeholder.configure({ placeholder: "Write the body here..." }),
     ],
     content: "<p></p>",
     editorProps: {
@@ -304,16 +354,31 @@ export function AdminEditor() {
   // Posts listener
   useEffect(() => {
     if (!db || !user) return;
-    const q = query(collection(db, "posts"), orderBy("publishedAt", "desc"));
+    const q = query(collection(db, collectionName), orderBy("publishedAt", "desc"));
     return onSnapshot(q, (snap) => {
       setPosts(snap.docs.map((d) => d.data() as PostMeta));
     });
-  }, [db, user]);
+  }, [collectionName, db, user]);
 
   // ── Helpers ────────────────────────────────────────────────────────────────
 
   function resetEditor() {
-    setForm(initialForm);
+    setForm(isCaseStudy ? initialCaseStudyForm : initialForm);
+    setOriginalSlug(null);
+    slugManuallyEdited.current = false;
+    setStatus("");
+    editor?.commands.setContent("<p></p>");
+  }
+
+  function switchContentType(type: ContentType) {
+    if (type === contentType) return;
+    setContentType(type);
+    setPosts([]);
+    setSelectedSlug(null);
+    setIsNewPost(false);
+    setDeleteTarget(null);
+    setSidebarOpen(false);
+    setForm(type === "caseStudies" ? initialCaseStudyForm : initialForm);
     setOriginalSlug(null);
     slugManuallyEdited.current = false;
     setStatus("");
@@ -332,6 +397,65 @@ export function AdminEditor() {
           ? slugify(value)
           : current.slug,
     }));
+  }
+
+  async function uploadCaseStudyImages(files: FileList | File[], target: "cover" | "gallery") {
+    const currentUser = auth?.currentUser;
+    if (!currentUser) {
+      setStatus("Sign in before uploading images.");
+      return;
+    }
+    if (!canPublish || !isCaseStudy) return;
+
+    const selectedFiles = Array.from(files).filter((file) => file.type.startsWith("image/"));
+    if (selectedFiles.length === 0) {
+      setStatus("Choose an image file to upload.");
+      return;
+    }
+
+    const slug = slugify(form.slug || form.title) || "draft";
+    setIsUploading(true);
+    setStatus(`Uploading ${selectedFiles.length} image${selectedFiles.length === 1 ? "" : "s"}...`);
+
+    try {
+      const idToken = await currentUser.getIdToken();
+      const urls = await Promise.all(
+        selectedFiles.map(async (file) => {
+          const path = `case-studies/${slug}/${Date.now()}-${cleanFileName(file.name)}`;
+          const blob = await upload(path, file, {
+            access: "public",
+            contentType: file.type,
+            handleUploadUrl: "/api/blob-upload",
+            clientPayload: JSON.stringify({
+              contentType: collectionName,
+              slug,
+              target,
+            }),
+            headers: {
+              Authorization: `Bearer ${idToken}`,
+            },
+          });
+          return blob.url;
+        }),
+      );
+
+      if (target === "cover") {
+        updateField("coverImagePath", urls[0]);
+      } else {
+        setForm((current) => ({
+          ...current,
+          galleryImages: [current.galleryImages.trim(), ...urls]
+            .filter(Boolean)
+            .join("\n"),
+        }));
+      }
+
+      setStatus(`${selectedFiles.length} image${selectedFiles.length === 1 ? "" : "s"} uploaded.`);
+    } catch (error) {
+      setStatus(error instanceof Error ? error.message : "Image upload failed.");
+    } finally {
+      setIsUploading(false);
+    }
   }
 
   function openNewPost() {
@@ -361,6 +485,22 @@ export function AdminEditor() {
       scheduledAt: post.scheduledAt
         ? post.scheduledAt.toDate().toISOString().slice(0, 16)
         : "",
+      client: post.client ?? "",
+      summary: post.summary ?? "",
+      headlineMetric: post.headlineMetric ?? "",
+      metricLabel: post.metricLabel ?? "",
+      highlightMetrics:
+        post.highlightMetrics && post.highlightMetrics.length > 0
+          ? post.highlightMetrics
+              .map((metric) => `${metric.value}${metric.label ? ` | ${metric.label}` : ""}`)
+              .join("\n")
+          : post.headlineMetric
+          ? `${post.headlineMetric}${post.metricLabel ? ` | ${post.metricLabel}` : ""}`
+          : "",
+      duration: post.duration ?? "",
+      services: (post.services ?? []).join(", "),
+      coverImagePath: post.coverImagePath ?? post.ogImagePath ?? "",
+      galleryImages: (post.galleryImages ?? []).join("\n"),
     });
     editor?.commands.setContent(post.content ?? "<p></p>");
   }
@@ -395,23 +535,54 @@ export function AdminEditor() {
     }
 
     const docId = originalSlug ?? slug;
+    const tags = form.tags.split(",").map((t) => t.trim()).filter(Boolean);
+    const services = form.services.split(",").map((t) => t.trim()).filter(Boolean);
+    const highlightMetrics = form.highlightMetrics
+      .split(/\r?\n/)
+      .map((line) => {
+        const [value, ...labelParts] = line.split("|");
+        return {
+          value: value.trim(),
+          label: labelParts.join("|").trim(),
+        };
+      })
+      .filter((metric) => metric.value);
+    const galleryImages = form.galleryImages
+      .split(/\r?\n|,/)
+      .map((image) => image.trim())
+      .filter(Boolean);
 
     setIsSaving(true);
     setStatus("Saving...");
 
     try {
       await setDoc(
-        doc(db, "posts", docId),
+        doc(db, collectionName, docId),
         {
           slug,
           title: form.title.trim(),
           category: form.category.trim(),
-          tags: form.tags.split(",").map((t) => t.trim()).filter(Boolean),
+          tags,
           readTime: form.readTime.trim(),
           publishedAt: Timestamp.fromDate(new Date(form.publishedAt)),
           content: editor.getHTML(),
-          ogImagePath: form.ogImagePath.trim() || `/blog-og/${slug}`,
+          ogImagePath: isCaseStudy
+            ? form.coverImagePath.trim()
+            : form.ogImagePath.trim() || `/blog-og/${slug}`,
           author: form.author.trim() || "My Lead Partner",
+          ...(isCaseStudy
+            ? {
+                client: form.client.trim(),
+                summary: form.summary.trim(),
+                headlineMetric: highlightMetrics[0]?.value ?? form.headlineMetric.trim(),
+                metricLabel: highlightMetrics[0]?.label ?? form.metricLabel.trim(),
+                highlightMetrics,
+                duration: form.duration.trim(),
+                services,
+                coverImagePath: form.coverImagePath.trim(),
+                galleryImages,
+              }
+            : {}),
           status: form.status,
           scheduledAt:
             form.status === "scheduled" && form.scheduledAt
@@ -426,8 +597,8 @@ export function AdminEditor() {
         form.status === "scheduled"
           ? `Scheduled for ${new Date(form.scheduledAt).toLocaleString()}`
           : isNewPost
-          ? "Post published."
-          : "Post updated.",
+          ? `${isCaseStudy ? "Case study" : "Post"} published.`
+          : `${isCaseStudy ? "Case study" : "Post"} updated.`,
       );
 
       if (isNewPost) {
@@ -448,7 +619,7 @@ export function AdminEditor() {
   async function confirmDelete() {
     if (!db || !deleteTarget) return;
     try {
-      await deleteDoc(doc(db, "posts", deleteTarget.slug));
+      await deleteDoc(doc(db, collectionName, deleteTarget.slug));
       if (selectedSlug === deleteTarget.slug) {
         resetEditor();
         setSelectedSlug(null);
@@ -520,6 +691,22 @@ export function AdminEditor() {
           </p>
           <span className="hidden text-[var(--border)] sm:inline">/</span>
           <p className="hidden text-sm text-[var(--secondary)] sm:block">Admin</p>
+          <div className="hidden rounded-full border border-[var(--border)] p-1 sm:flex">
+            {(["posts", "caseStudies"] as ContentType[]).map((type) => (
+              <button
+                key={type}
+                type="button"
+                onClick={() => switchContentType(type)}
+                className={`rounded-full px-3 py-1 text-xs font-bold transition-colors ${
+                  contentType === type
+                    ? "bg-[var(--accent)] text-[var(--background)]"
+                    : "text-[var(--secondary)] hover:text-[var(--text)]"
+                }`}
+              >
+                {type === "posts" ? "Posts" : "Case Studies"}
+              </button>
+            ))}
+          </div>
         </div>
         <div className="flex items-center gap-2">
           <button
@@ -552,7 +739,7 @@ export function AdminEditor() {
         >
           <div className="flex items-center justify-between border-b border-[var(--border)] px-4 py-3">
             <p className="text-xs font-bold uppercase tracking-widest text-[var(--secondary)]">
-              Posts ({posts.length})
+              {pluralLabel} ({posts.length})
             </p>
             <button
               onClick={openNewPost}
@@ -562,10 +749,29 @@ export function AdminEditor() {
             </button>
           </div>
 
+          <div className="border-b border-[var(--border)] p-3 sm:hidden">
+            <div className="grid grid-cols-2 gap-1 rounded-full border border-[var(--border)] p-1">
+              {(["posts", "caseStudies"] as ContentType[]).map((type) => (
+                <button
+                  key={type}
+                  type="button"
+                  onClick={() => switchContentType(type)}
+                  className={`rounded-full px-3 py-1.5 text-xs font-bold transition-colors ${
+                    contentType === type
+                      ? "bg-[var(--accent)] text-[var(--background)]"
+                      : "text-[var(--secondary)]"
+                  }`}
+                >
+                  {type === "posts" ? "Posts" : "Cases"}
+                </button>
+              ))}
+            </div>
+          </div>
+
           <ul className="flex-1 overflow-y-auto">
             {posts.length === 0 && (
               <li className="px-4 py-8 text-center text-sm text-[var(--secondary)]">
-                No posts yet.
+                No {pluralLabel.toLowerCase()} yet.
               </li>
             )}
             {posts.map((post) => (
@@ -617,15 +823,15 @@ export function AdminEditor() {
         <section className="flex flex-1 flex-col overflow-y-auto">
           {!editorOpen ? (
             <div className="flex flex-1 flex-col items-center justify-center gap-4 text-center px-6">
-              <p className="text-2xl font-heading text-[var(--text)]">No post selected</p>
+              <p className="text-2xl font-heading text-[var(--text)]">No {singularLabel} selected</p>
               <p className="text-sm text-[var(--secondary)]">
-                Pick a post from the list to edit, or create a new one.
+                Pick a {singularLabel} from the list to edit, or create a new one.
               </p>
               <button
                 onClick={openNewPost}
                 className="mt-2 rounded-full bg-[var(--accent)] px-6 py-2.5 text-sm font-bold text-[var(--background)] hover:opacity-90 transition-opacity"
               >
-                + New Post
+                + New {isCaseStudy ? "Case Study" : "Post"}
               </button>
             </div>
           ) : (
@@ -635,7 +841,7 @@ export function AdminEditor() {
             >
               <div className="flex items-center justify-between gap-3">
                 <h1 className="font-heading text-xl sm:text-2xl">
-                  {isNewPost ? "New post" : "Edit post"}
+                  {isNewPost ? `New ${singularLabel}` : `Edit ${singularLabel}`}
                 </h1>
                 {!isNewPost && (
                   <span className="text-xs text-[var(--secondary)] border border-[var(--border)] rounded-full px-3 py-1 truncate max-w-[160px] sm:max-w-none">
@@ -653,15 +859,25 @@ export function AdminEditor() {
               {/* Fields grid */}
               <div className="grid gap-4 sm:grid-cols-2">
                 {(
-                  [
-                    ["title", "Title"],
-                    ["slug", "Slug"],
-                    ["category", "Category"],
-                    ["tags", "Tags, comma separated"],
-                    ["readTime", "Read time"],
-                    ["author", "Author"],
-                    ["ogImagePath", "OG image path"],
-                  ] as [keyof FormState, string][]
+                  (isCaseStudy
+                    ? [
+                        ["title", "Title"],
+                        ["slug", "Slug"],
+                        ["client", "Client / business"],
+                        ["category", "Industry / category"],
+                        ["duration", "Timeline / duration"],
+                        ["services", "Services, comma separated"],
+                        ["tags", "Tags, comma separated"],
+                      ]
+                    : [
+                        ["title", "Title"],
+                        ["slug", "Slug"],
+                        ["category", "Category"],
+                        ["tags", "Tags, comma separated"],
+                        ["readTime", "Read time"],
+                        ["author", "Author"],
+                        ["ogImagePath", "OG image path"],
+                      ]) as [keyof FormState, string][]
                 ).map(([name, label]) => (
                   <label key={name} className="grid gap-2 text-sm text-[var(--secondary)]">
                     {label}
@@ -669,7 +885,15 @@ export function AdminEditor() {
                       className="min-h-12 border border-[var(--border)] bg-[var(--field)] px-3 text-[var(--text)] outline-none focus:border-[var(--accent)] transition-colors"
                       value={form[name] as string}
                       onChange={(e) => updateField(name, e.target.value)}
-                      required={name !== "ogImagePath" && name !== "tags"}
+                      required={
+                        name !== "ogImagePath" &&
+                        name !== "tags" &&
+                        name !== "coverImagePath" &&
+                        name !== "services" &&
+                        name !== "duration" &&
+                        name !== "headlineMetric" &&
+                        name !== "metricLabel"
+                      }
                     />
                   </label>
                 ))}
@@ -684,6 +908,91 @@ export function AdminEditor() {
                   />
                 </label>
               </div>
+
+              {isCaseStudy && (
+                <div className="grid gap-4 rounded-md border border-[var(--border)] bg-[var(--surface)] p-4">
+                  <label className="grid gap-2 text-sm text-[var(--secondary)]">
+                    Short summary
+                    <textarea
+                      className="min-h-28 resize-y border border-[var(--border)] bg-[var(--field)] px-3 py-3 text-[var(--text)] outline-none focus:border-[var(--accent)] transition-colors"
+                      value={form.summary}
+                      onChange={(e) => updateField("summary", e.target.value)}
+                      placeholder="A concise setup of the problem, work, and result. This appears on cards and the case-study header."
+                    />
+                  </label>
+                  <div className="grid gap-3 rounded-md border border-[var(--border)] bg-[var(--field)] p-4">
+                    <div className="grid gap-2 text-sm text-[var(--secondary)]">
+                      Cover image upload
+                      <input
+                        className="block w-full cursor-pointer text-sm text-[var(--secondary)] file:mr-4 file:min-h-10 file:rounded-full file:border-0 file:bg-[var(--accent)] file:px-4 file:text-sm file:font-bold file:text-[var(--background)]"
+                        type="file"
+                        accept="image/*"
+                        disabled={isUploading || !canPublish}
+                        onChange={(event) => {
+                          if (event.currentTarget.files) {
+                            void uploadCaseStudyImages(event.currentTarget.files, "cover");
+                            event.currentTarget.value = "";
+                          }
+                        }}
+                      />
+                    </div>
+                    <label className="grid gap-2 text-sm text-[var(--secondary)]">
+                      Cover image URL
+                      <input
+                        className="min-h-12 border border-[var(--border)] bg-[var(--field)] px-3 text-[var(--text)] outline-none focus:border-[var(--accent)] transition-colors"
+                        value={form.coverImagePath}
+                        onChange={(e) => updateField("coverImagePath", e.target.value)}
+                        placeholder="Upload an image above, or paste a URL."
+                      />
+                    </label>
+                  </div>
+                  <label className="grid gap-2 text-sm text-[var(--secondary)]">
+                    Highlight metrics
+                    <textarea
+                      className="min-h-28 resize-y border border-[var(--border)] bg-[var(--field)] px-3 py-3 text-[var(--text)] outline-none focus:border-[var(--accent)] transition-colors"
+                      value={form.highlightMetrics}
+                      onChange={(e) => updateField("highlightMetrics", e.target.value)}
+                      placeholder={"4.2x | Qualified lead volume\n62% | Lower cost per purchase\n80 | Qualified enquiries per month"}
+                    />
+                    <p className="text-xs leading-relaxed text-[var(--secondary)]">
+                      Add one metric per line. Put the big number first, then a vertical bar, then the label.
+                    </p>
+                  </label>
+                  <div className="grid gap-3 rounded-md border border-[var(--border)] bg-[var(--field)] p-4">
+                    <div className="grid gap-2 text-sm text-[var(--secondary)]">
+                      Gallery image uploads
+                      <input
+                        className="block w-full cursor-pointer text-sm text-[var(--secondary)] file:mr-4 file:min-h-10 file:rounded-full file:border-0 file:bg-[var(--accent)] file:px-4 file:text-sm file:font-bold file:text-[var(--background)]"
+                        type="file"
+                        accept="image/*"
+                        multiple
+                        disabled={isUploading || !canPublish}
+                        onChange={(event) => {
+                          if (event.currentTarget.files) {
+                            void uploadCaseStudyImages(event.currentTarget.files, "gallery");
+                            event.currentTarget.value = "";
+                          }
+                        }}
+                      />
+                    </div>
+                    <p className="text-xs leading-relaxed text-[var(--secondary)]">
+                      Uploaded gallery images are appended below automatically.
+                    </p>
+                  </div>
+                  <label className="grid gap-2 text-sm text-[var(--secondary)]">
+                    Gallery image paths or URLs
+                    <textarea
+                      className="min-h-28 resize-y border border-[var(--border)] bg-[var(--field)] px-3 py-3 text-[var(--text)] outline-none focus:border-[var(--accent)] transition-colors"
+                      value={form.galleryImages}
+                      onChange={(e) => updateField("galleryImages", e.target.value)}
+                      placeholder={"/case-study-image-1.jpg\nhttps://example.com/image-2.jpg"}
+                    />
+                    <p className="text-xs leading-relaxed text-[var(--secondary)]">
+                      Add one image per line. Use files from the public folder like /work.jpg, or paste hosted image URLs.
+                    </p>
+                  </label>
+                </div>
+              )}
 
               {/* Scheduling section */}
               <div className="grid gap-3 rounded-md border border-[var(--border)] bg-[var(--surface)] p-4">
@@ -725,7 +1034,7 @@ export function AdminEditor() {
                       required
                     />
                     <p className="text-xs text-[var(--secondary)]">
-                      The post will appear on your blog as soon as a visitor loads it after this time. No backend required.
+                      The {singularLabel} will appear on the site as soon as a visitor loads it after this time. No backend required.
                     </p>
                   </label>
                 )}
@@ -761,12 +1070,14 @@ export function AdminEditor() {
                 <button
                   className="min-h-12 rounded-full bg-[var(--accent)] px-8 font-bold text-[var(--background)] disabled:opacity-60 hover:opacity-90 transition-opacity"
                   type="submit"
-                  disabled={isSaving || !canPublish}
+                  disabled={isSaving || isUploading || !canPublish}
                 >
                   {isSaving
                     ? "Saving..."
+                    : isUploading
+                    ? "Uploading..."
                     : form.status === "scheduled"
-                    ? "Schedule post"
+                    ? `Schedule ${singularLabel}`
                     : isNewPost
                     ? "Publish"
                     : "Save changes"}
