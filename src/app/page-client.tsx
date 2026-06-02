@@ -4,9 +4,6 @@ import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { motion, useInView, useScroll, useTransform } from "framer-motion";
-import Lenis from "lenis";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
 import type { CaseStudy } from "@/lib/case-studies";
 import { contactEmail } from "@/lib/site";
 import Script from 'next/script'
@@ -229,7 +226,7 @@ const faqs = [
 
 function Logo() {
   return (
-    <a href="#" className="logo-mark" aria-label="My Lead Partner home">
+    <a href="/" className="logo-mark" aria-label="My Lead Partner home">
       <Image
         className="logo-image logo-image-dark"
         src="/mlp-logo-white-cropped.png"
@@ -633,34 +630,51 @@ function Partnership() {
   const [active, setActive] = useState(0);
 
   useEffect(() => {
-    gsap.registerPlugin(ScrollTrigger);
     const section = sectionRef.current;
     const track = trackRef.current;
     if (!section || !track) return;
     const media = window.matchMedia("(min-width: 901px)");
     if (!media.matches) return;
+    let cleanup: (() => void) | undefined;
+    let cancelled = false;
 
-    const ctx = gsap.context(() => {
-      ScrollTrigger.create({
-        trigger: section,
-        start: "top top",
-        end: "+=2400",
-        pin: ".phase-pin",
-        scrub: true,
-        onUpdate: (self) => {
-          const next = Math.min(3, Math.floor(self.progress * phases.length));
-          setActive(next);
-          gsap.to(track, {
-            yPercent: next * -25,
-            duration: 0.55,
-            ease: "power3.out",
-            overwrite: true,
-          });
-        },
-      });
-    }, section);
+    async function setupGsap() {
+      const [{ default: gsap }, { ScrollTrigger }] = await Promise.all([
+        import("gsap"),
+        import("gsap/ScrollTrigger"),
+      ]);
+      if (cancelled) return;
 
-    return () => ctx.revert();
+      gsap.registerPlugin(ScrollTrigger);
+      const ctx = gsap.context(() => {
+        ScrollTrigger.create({
+          trigger: section,
+          start: "top top",
+          end: "+=2400",
+          pin: ".phase-pin",
+          scrub: true,
+          onUpdate: (self) => {
+            const next = Math.min(3, Math.floor(self.progress * phases.length));
+            setActive(next);
+            gsap.to(track, {
+              yPercent: next * -25,
+              duration: 0.55,
+              ease: "power3.out",
+              overwrite: true,
+            });
+          },
+        });
+      }, section);
+
+      cleanup = () => ctx.revert();
+    }
+
+    void setupGsap();
+
+    return () => {
+      cancelled = true;
+      cleanup?.();
+    };
   }, []);
 
   return (
@@ -1196,23 +1210,41 @@ export function HomePageClient({
       return;
     }
 
-    const lenis = new Lenis({
-      duration: 1.15,
-      smoothWheel: true,
-      wheelMultiplier: 0.9,
-    });
-
     let frame = 0;
-    const raf = (time: number) => {
-      lenis.raf(time);
-      ScrollTrigger.update();
-      frame = requestAnimationFrame(raf);
-    };
+    let cleanup: (() => void) | undefined;
+    let cancelled = false;
 
-    frame = requestAnimationFrame(raf);
+    async function setupSmoothScroll() {
+      const [{ default: Lenis }, { ScrollTrigger }] = await Promise.all([
+        import("lenis"),
+        import("gsap/ScrollTrigger"),
+      ]);
+      if (cancelled) return;
+
+      const lenis = new Lenis({
+        duration: 1.15,
+        smoothWheel: true,
+        wheelMultiplier: 0.9,
+      });
+
+      const raf = (time: number) => {
+        lenis.raf(time);
+        ScrollTrigger.update();
+        frame = requestAnimationFrame(raf);
+      };
+
+      frame = requestAnimationFrame(raf);
+      cleanup = () => {
+        cancelAnimationFrame(frame);
+        lenis.destroy();
+      };
+    }
+
+    void setupSmoothScroll();
+
     return () => {
-      cancelAnimationFrame(frame);
-      lenis.destroy();
+      cancelled = true;
+      cleanup?.();
     };
   }, []);
 

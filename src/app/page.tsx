@@ -1,10 +1,9 @@
 import type { Metadata } from "next";
-import { headers } from "next/headers";
 import { HomePageClient } from "./page-client";
 import { getCaseStudies } from "@/lib/case-studies";
 import { contactEmail, siteName, siteUrl } from "@/lib/site";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 300;
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -49,14 +48,9 @@ export const metadata: Metadata = {
 };
 
 export default async function Home() {
-  const headersList = await headers();
   const caseStudies = await getCaseStudies();
-  const country = headersList.get("x-vercel-ip-country") ?? "UNKNOWN";
-  const isPakistan = country === "PK";
 
-  const pricingText = isPakistan
-    ? "We work on custom monthly retainers. Our services start from as low as PKR 60,000."
-    : "We work on custom monthly retainers. Our services start from as low as $499.";
+  const pricingText = "We work on custom monthly retainers. Our services start from as low as $499.";
 
   const organizationJsonLd = {
     "@context": "https://schema.org",

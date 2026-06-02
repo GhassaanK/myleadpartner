@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
 import { contactEmail, siteName, siteUrl } from "@/lib/site";
 
@@ -227,7 +226,7 @@ export default function ServicesPage() {
       ))}
 
       <section className="relative overflow-hidden border-b border-[var(--border)] bg-gradient-to-b from-[var(--surface)] to-[var(--background)]">
-        <div className="mx-auto grid max-w-6xl gap-10 px-6 py-12 sm:px-8 md:grid-cols-[1.05fr_0.95fr] md:items-center md:py-20">
+        <div className="mx-auto max-w-6xl px-6 py-12 sm:px-8 md:py-20">
           <div>
             <Link
               href="/"
@@ -260,16 +259,6 @@ export default function ServicesPage() {
                 View Case Studies
               </Link>
             </div>
-          </div>
-          <div className="relative aspect-[16/13] overflow-hidden rounded-lg border border-[var(--border)] bg-[var(--surface)]">
-            <Image
-              src="/growth-operations-hero.png"
-              alt="Growth operations workspace for performance marketing and lead generation services"
-              fill
-              priority
-              sizes="(max-width: 768px) 100vw, 50vw"
-              className="object-cover"
-            />
           </div>
         </div>
       </section>
