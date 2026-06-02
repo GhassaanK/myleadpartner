@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { contactEmail, siteUrl } from "@/lib/site";
 
 export const metadata = {
   title: "Privacy Policy | My Lead Partner",
@@ -6,7 +7,7 @@ export const metadata = {
   openGraph: {
     title: "Privacy Policy | My Lead Partner",
     description: "Learn about our data collection, usage, and your privacy rights at My Lead Partner.",
-    url: "https://myleadpartner.com/privacy",
+    url: `${siteUrl}/privacy`,
     type: "website",
     locale: "en_US",
   },
@@ -16,7 +17,7 @@ export const metadata = {
     description: "Learn about our data collection, usage, and your privacy rights at My Lead Partner.",
   },
   alternates: {
-    canonical: "https://myleadpartner.com/privacy",
+    canonical: `${siteUrl}/privacy`,
   },
 };
 
@@ -51,7 +52,7 @@ export default function PrivacyPolicy() {
               us about a partnership, you're dealing with us directly.
             </p>
             <p className="text-base leading-relaxed text-[var(--secondary)]">
-              If you have questions about this policy, you can reach us at: hello@myleadpartner.com
+              If you have questions about this policy, you can reach us at: {contactEmail}
             </p>
           </section>
 
@@ -132,7 +133,7 @@ export default function PrivacyPolicy() {
               <li>Object to how we're using your data</li>
               <li>Withdraw consent for any processing based on consent</li>
             </ul>
-            <p className="text-base leading-relaxed text-[var(--secondary)]">To exercise any of these rights, contact us at hello@myleadpartner.com. We'll respond within 30 days.</p>
+            <p className="text-base leading-relaxed text-[var(--secondary)]">To exercise any of these rights, contact us at {contactEmail}. We'll respond within 30 days.</p>
           </section>
 
           <section>
@@ -150,7 +151,7 @@ export default function PrivacyPolicy() {
             <p className="text-base leading-relaxed text-[var(--secondary)]">If anything here is unclear or you have a concern, reach out directly:</p>
             <div className="mt-4 rounded-lg border border-[var(--border)] bg-[var(--surface)] p-4">
               <p className="text-[var(--text)]"><strong>My Lead Partner</strong></p>
-              <p className="mt-2 text-[var(--secondary)]">privacy@myleadpartner.com</p>
+              <p className="mt-2 text-[var(--secondary)]">{contactEmail}</p>
             </div>
           </section>
         </div>

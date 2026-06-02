@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { formatPublishedAt, getPosts, postDescription } from "@/lib/posts";
+import { siteUrl } from "@/lib/site";
 
 export const metadata = {
   title: "Blog | My Lead Partner",
@@ -8,7 +10,7 @@ export const metadata = {
     title: "Blog | My Lead Partner",
     description:
       "Read insights on growth strategy, marketing operations, lead generation, and building scalable business systems.",
-    url: "https://myleadpartner.com/blog",
+    url: `${siteUrl}/blog`,
     type: "website",
     locale: "en_US",
   },
@@ -18,24 +20,12 @@ export const metadata = {
     description: "Growth strategy and operations insights.",
   },
   alternates: {
-    canonical: "https://myleadpartner.com/blog",
+    canonical: `${siteUrl}/blog`,
   },
   robots: "index, follow",
 };
 
-export const revalidate = 86400;
-
-const articles = [
-  {
-    slug: "how-to-run-meta-ads-for-service-business",
-    title: "How to Run Meta Ads for a Service Business (Without Wasting Your Budget)",
-    excerpt:
-      "Most service businesses run Meta ads the same way e-commerce brands do. The economics are completely different. Here's how to build a campaign that actually generates clients.",
-    date: "June 1, 2026",
-    category: "Acquisition",
-    readTime: "8 min read",
-  },
-];
+export const revalidate = 300;
 
 function CategoryBadge({ category }: { category: string }) {
   const colors: Record<string, string> = {
@@ -53,10 +43,11 @@ function CategoryBadge({ category }: { category: string }) {
   );
 }
 
-export default function Blog() {
+export default async function Blog() {
+  const posts = await getPosts();
+
   return (
     <main className="min-h-screen bg-[var(--background)] text-[var(--text)]">
-      {/* Header */}
       <div className="relative overflow-hidden border-b border-[var(--border)] bg-gradient-to-b from-[var(--surface)] to-[var(--background)]">
         <div className="mx-auto max-w-3xl px-6 py-12 sm:px-8 md:py-16">
           <div className="mb-4 flex items-center">
@@ -64,7 +55,7 @@ export default function Blog() {
               href="/"
               className="inline-flex items-center gap-2 rounded-md border border-[var(--border)] bg-[var(--surface)] px-3 py-1 text-sm font-medium text-[var(--text)] hover:opacity-90"
             >
-              ← Back to home
+              Back to home
             </Link>
           </div>
           <h1 className="font-heading text-3xl font-bold md:text-4xl">Blog</h1>
@@ -75,42 +66,42 @@ export default function Blog() {
         </div>
       </div>
 
-      {/* Articles Grid */}
       <div className="mx-auto max-w-3xl px-6 py-10 sm:px-8 md:py-16">
-        <div className="space-y-6">
-          {articles.map((article) => (
-            <Link
-              key={article.slug}
-              href={`/blog/${article.slug}`}
-              className="group block rounded-lg border border-[var(--border)] bg-[var(--surface)] p-6 transition-all hover:border-[var(--accent-border)] hover:bg-[var(--raised)]"
-            >
-              <div className="mb-3 flex items-center justify-between">
-                <CategoryBadge category={article.category} />
-                <span className="text-xs text-[var(--secondary)]">{article.readTime}</span>
-              </div>
+        {posts.length > 0 ? (
+          <div className="space-y-6">
+            {posts.map((post) => (
+              <Link
+                key={post.id}
+                href={`/blog/${post.slug}`}
+                className="group block rounded-lg border border-[var(--border)] bg-[var(--surface)] p-6 transition-all hover:border-[var(--accent-border)] hover:bg-[var(--raised)]"
+              >
+                <div className="mb-3 flex items-center justify-between gap-4">
+                  <CategoryBadge category={post.category} />
+                  <span className="text-xs text-[var(--secondary)]">{post.readTime}</span>
+                </div>
 
-              <h2 className="font-heading text-xl font-bold text-[var(--text)] group-hover:text-[var(--accent)] transition-colors">
-                {article.title}
-              </h2>
+                <h2 className="font-heading text-xl font-bold text-[var(--text)] transition-colors group-hover:text-[var(--accent)]">
+                  {post.title}
+                </h2>
 
-              <p className="mt-3 text-base leading-relaxed text-[var(--secondary)]">{article.excerpt}</p>
+                <p className="mt-3 text-base leading-relaxed text-[var(--secondary)]">
+                  {postDescription(post)}
+                </p>
 
-              <div className="mt-4 flex items-center justify-between">
-                <span className="text-xs text-[var(--muted)]">{article.date}</span>
-                <span className="text-sm text-[var(--accent)] group-hover:translate-x-1 transition-transform">
-                  Read article →
-                </span>
-              </div>
-            </Link>
-          ))}
-        </div>
-
-        {/* More Coming */}
-        <div className="mt-12 rounded-lg border border-[var(--border)] bg-[var(--surface)] p-8 text-center">
-          <p className="text-[var(--secondary)]">
-            More articles coming soon.
-          </p>
-        </div>
+                <div className="mt-4 flex items-center justify-between gap-4">
+                  <span className="text-xs text-[var(--muted)]">{formatPublishedAt(post.publishedAt)}</span>
+                  <span className="text-sm text-[var(--accent)] transition-transform group-hover:translate-x-1">
+                    Read article
+                  </span>
+                </div>
+              </Link>
+            ))}
+          </div>
+        ) : (
+          <div className="border-t border-[var(--border)] pt-8">
+            <p className="text-[var(--secondary)]">No articles are published yet.</p>
+          </div>
+        )}
       </div>
     </main>
   );

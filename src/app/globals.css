@@ -1256,6 +1256,22 @@ p {
   transform: translateY(28px);
 }
 
+.footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px;
+  color: var(--secondary);
+  font-size: 13px;
+}
+
+.footer-links a {
+  transition: color 0.25s ease;
+}
+
+.footer-links a:hover {
+  color: var(--accent-hover);
+}
+
 .lead-form {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -1384,6 +1400,18 @@ p {
   padding: 0 12px;
   cursor: pointer;
   font-size: 12px;
+}
+
+.admin-tool {
+  min-height: 34px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text);
+  padding: 0 12px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 800;
 }
 
 @media (max-width: 900px) {

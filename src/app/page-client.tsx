@@ -7,6 +7,7 @@ import { motion, useInView, useScroll, useTransform } from "framer-motion";
 import Lenis from "lenis";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { contactEmail } from "@/lib/site";
 import Script from 'next/script'
 
 
@@ -904,6 +905,15 @@ function Footer() {
           <span>Execution</span>
           <span>Compounding</span>
         </div>
+        <div className="footer-links">
+          <a href={`mailto:${contactEmail}`}>{contactEmail}</a>
+          <a href="https://www.linkedin.com/company/my-lead-partner" target="_blank" rel="noopener noreferrer">
+            LinkedIn
+          </a>
+          <a href="https://www.instagram.com/myleadpartner" target="_blank" rel="noopener noreferrer">
+            Instagram
+          </a>
+        </div>
         <div className="footer-bottom">
           <span>Built for serious operators.</span>
           <div className="flex items-center gap-4">
@@ -985,7 +995,7 @@ function LeadForm({ compact = false, source }: LeadFormProps) {
       </button>
       <p className={`form-status ${status}`}>
         {status === "success" && "Got it. We'll be in touch within 24 hours."}
-        {status === "error" && "Something blocked the submission. Email hello@myleadpartner.com."}
+        {status === "error" && `Something blocked the submission. Email ${contactEmail}.`}
       </p>
     </form>
   );

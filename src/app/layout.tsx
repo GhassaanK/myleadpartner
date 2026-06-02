@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { DM_Sans, Fraunces } from "next/font/google";
+import { siteUrl } from "@/lib/site";
 import "./globals.css";
 
 const fraunces = Fraunces({
@@ -15,7 +16,7 @@ const dmSans = DM_Sans({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://myleadpartner.com"),
+  metadataBase: new URL(siteUrl),
   title: "My Lead Partner | Growth Operating Partner",
   description:
     "My Lead Partner helps businesses scale through performance marketing, lead generation, web development, digital infrastructure, and growth management.",
@@ -23,7 +24,7 @@ export const metadata: Metadata = {
     title: "My Lead Partner | Growth Operating Partner",
     description:
       "My Lead Partner helps businesses scale through performance marketing, lead generation, web development, digital infrastructure, and growth management.",
-    url: "https://myleadpartner.com",
+    url: siteUrl,
     type: "website",
     locale: "en_US",
   },
@@ -33,7 +34,7 @@ export const metadata: Metadata = {
     description: "My Lead Partner helps businesses scale through performance marketing and growth management.",
   },
   alternates: {
-    canonical: "https://myleadpartner.com",
+    canonical: siteUrl,
   },
   icons: {
     icon: [
@@ -53,7 +54,7 @@ const localBusinessJsonLd = {
   "@context": "https://schema.org",
   "@type": "LocalBusiness",
   name: "My Lead Partner",
-  url: "https://myleadpartner.com",
+  url: siteUrl,
   telephone: "+923112887279",
   address: {
     "@type": "PostalAddress",
@@ -73,7 +74,7 @@ const localBusinessJsonLd = {
     "@type": "ContactPoint",
     contactType: "sales",
     telephone: "+923112887279",
-    url: "https://myleadpartner.com/#contact",
+    url: `${siteUrl}/#contact`,
   },
 };
 

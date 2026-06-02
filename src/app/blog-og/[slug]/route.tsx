@@ -1,48 +1,21 @@
 import { ImageResponse } from "next/og";
+import { getPostBySlug } from "@/lib/posts";
 
 export const runtime = "edge";
 
-const articleTitles: Record<string, { title: string; category: string }> = {
-  "how-to-build-lead-generation-system": {
-    title: "How to Build a Lead Generation System for a Service Business",
-    category: "Lead Generation",
-  },
-  "why-meta-ads-arent-scaling": {
-    title: "Why Your Meta Ads Aren't Scaling",
-    category: "Acquisition",
-  },
-  "growth-architecture-vs-marketing-tactics": {
-    title: "Growth Architecture vs. Marketing Tactics",
-    category: "Strategy",
-  },
-  "unit-economics-funnel-design": {
-    title: "Unit Economics: The Foundation of Funnel Design",
-    category: "Operations",
-  },
-  "performance-marketing-beyond-roas": {
-    title: "Performance Marketing Beyond ROAS",
-    category: "Acquisition",
-  },
-  "lead-generation-infrastructure": {
-    title: "The Hidden Cost of Inefficient Lead Generation Infrastructure",
-    category: "Lead Generation",
-  },
-  "content-systems-compounding": {
-    title: "Content Systems That Compound",
-    category: "Content",
-  },
-  "growth-operating-model": {
-    title: "The Growth Operating Model",
-    category: "Operations",
-  },
-};
+function titleFromSlug(slug: string) {
+  return slug
+    .split("-")
+    .filter(Boolean)
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+}
 
 export async function GET(_request: Request, { params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const article = articleTitles[slug] ?? {
-    title: "Growth Operations Insight",
-    category: "My Lead Partner",
-  };
+  const post = await getPostBySlug(slug);
+  const title = post?.title ?? titleFromSlug(slug);
+  const category = post?.category ?? "My Lead Partner";
 
   return new ImageResponse(
     (
@@ -105,7 +78,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ slu
               textTransform: "uppercase",
             }}
           >
-            {article.category}
+            {category}
           </div>
           <div
             style={{
@@ -115,7 +88,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ slu
               letterSpacing: "0",
             }}
           >
-            {article.title}
+            {title}
           </div>
         </div>
         <div style={{ color: "#7A8878", fontSize: "26px" }}>
